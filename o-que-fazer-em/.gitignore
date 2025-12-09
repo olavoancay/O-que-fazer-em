@@ -1,43 +1,101 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
-
-# dependencies
-node_modules/
-
 # Expo
 .expo/
+.expo-shared/
 dist/
 web-build/
-expo-env.d.ts
 
-# Native
-.kotlin/
-*.orig.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
 
-# Metro
-.metro-health-check*
+# Testing
+coverage/
 
-# debug
-npm-debug.*
-yarn-debug.*
-yarn-error.*
+# Production
+build/
 
-# macOS
+# Misc
 .DS_Store
 *.pem
 
-# local env files
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Local env files
+.env
 .env*.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# typescript
+# Vercel
+.vercel
+
+# Typescript
 *.tsbuildinfo
+next-env.d.ts
 
-app-example
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 
-# generated native folders
-/ios
-/android
+# OS
+Thumbs.db
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn
+.yarn-integrity
+
+# Bundle
+*.jsbundle
+
+# CocoaPods (iOS)
+ios/Pods/
+ios/build/
+
+# Android
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+*.apk
+*.ap_
+*.aab
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# Temporary files
+*.log
+*.pid
+*.seed
+*.pid.lock
+
+# Ignore chaves de API (MUITO IMPORTANTE!)
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+google-services.json
+GoogleService-Info.plist
