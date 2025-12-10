@@ -1,122 +1,69 @@
-import React, { useState, useRef } from 'react';
-import {
-  View,
-  StyleSheet,
-  ActivityIndicator,
-  Text,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import { Ionicons } from '@expo/vector-icons';
-import useLocation from '../../hooks/useLocation';
-import { COLORS } from '../../constants/colors';
+import React, { useState } from 'react';
+import { View, StyleSheet, Text, ActivityIndicator } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
+import { useLocation } from '../../hooks/useLocation';
 
 export default function MapScreen() {
-  const mapRef = useRef(null);
-  const { location, region, loading, error, refreshLocation } = useLocation();
-  const [restaurants, setRestaurants] = useState([]);
-
-  // Dados mockados de restaurantes
-  const mockRestaurants = [
+  const { location, errorMsg, loading } = useLocation();
+  
+  const [restaurants, setRestaurants] = useState([
     {
       id: '1',
-      name: 'Restaurante Italiano',
-      latitude: -27.5954,
-      longitude: -48.5480,
-      cuisine: 'Italiana',
-      rating: 4.5,
+      name: 'Pizzaria Bella',
+      type: 'Italiana',
+      latitude: -27.5969,
+      longitude: -48.5482,
+      category: 'visited'
     },
     {
       id: '2',
-      name: 'Sushi Bar',
-      latitude: -27.5900,
-      longitude: -48.5500,
-      cuisine: 'Japonesa',
-      rating: 4.8,
-    },
-    {
-      id: '3',
-      name: 'Churrascaria',
-      latitude: -27.5980,
-      longitude: -48.5460,
-      cuisine: 'Brasileira',
-      rating: 4.3,
-    },
-  ];
-
-  React.useEffect(() => {
-    setRestaurants(mockRestaurants);
-  }, []);
-
-  // Centralizar mapa na sua localização
-  const centerOnUserLocation = () => {
-    if (location && mapRef.current) {
-      mapRef.current.animateToRegion({
-        latitude: location.latitude,
-        longitude: location.longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      }, 1000);
+      name: 'Sushi Place',
+      type: 'Japonesa',
+      latitude: -27.5950,
+      longitude: -48.5450,
+      category: 'favorite'
     }
-  };
+  ]);
 
-  // Quando clicar em um restaurante
-  const handleMarkerPress = (restaurant) => {
-    Alert.alert(
-      restaurant.name,
-      `${restaurant.cuisine} • ${restaurant.rating} ⭐`,
-      [
-        { text: 'Ver Detalhes', onPress: () => console.log('Ver detalhes') },
-        { text: 'Fechar', style: 'cancel' },
-      ]
-    );
+  const getMarkerColor = (category) => {
+    switch(category) {
+      case 'visited': return '#4CAF50';
+      case 'favorite': return '#FF5722';
+      case 'recommended': return '#2196F3';
+      default: return '#9E9E9E';
+    }
   };
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color="#FF5722" />
         <Text style={styles.loadingText}>Obtendo sua localização...</Text>
       </View>
     );
   }
 
-  if (error || !region) {
+  if (errorMsg) {
     return (
-      <View style={styles.errorContainer}>
-        <Ionicons name="location-outline" size={64} color={COLORS.gray} />
-        <Text style={styles.errorTitle}>Localização não disponível</Text>
-        <Text style={styles.errorText}>
-          {error || 'Não foi possível obter sua localização'}
+      <View style={styles.centerContainer}>
+        <Text style={styles.errorText}>❌ {errorMsg}</Text>
+        <Text style={styles.hintText}>
+          Verifique se permitiu acesso à localização nas configurações
         </Text>
-        <TouchableOpacity
-          style={styles.retryButton}
-          onPress={refreshLocation}
-        >
-          <Text style={styles.retryButtonText}>Tentar Novamente</Text>
-        </TouchableOpacity>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      {/* Mapa */}
       <MapView
-        ref={mapRef}
         style={styles.map}
-        provider={PROVIDER_GOOGLE}
-        initialRegion={region}
+        initialRegion={location}
         showsUserLocation={true}
-        showsMyLocationButton={false}
+        showsMyLocationButton={true}
         showsCompass={true}
-        showsScale={true}
         loadingEnabled={true}
-        loadingIndicatorColor={COLORS.primary}
-        loadingBackgroundColor={COLORS.white}
       >
-        {/* Markers dos restaurantes */}
         {restaurants.map((restaurant) => (
           <Marker
             key={restaurant.id}
@@ -125,36 +72,26 @@ export default function MapScreen() {
               longitude: restaurant.longitude,
             }}
             title={restaurant.name}
-            description={`${restaurant.cuisine} • ${restaurant.rating} ⭐`}
-            onPress={() => handleMarkerPress(restaurant)}
-          >
-            {/* Ícone customizado do marker */}
-            <View style={styles.markerContainer}>
-              <View style={styles.marker}>
-                <Ionicons name="restaurant" size={20} color={COLORS.white} />
-              </View>
-              <View style={styles.markerArrow} />
-            </View>
-          </Marker>
+            description={restaurant.type}
+            pinColor={getMarkerColor(restaurant.category)}
+          />
         ))}
       </MapView>
 
-      {/* Botão para centralizar na sua localização */}
-      <TouchableOpacity
-        style={styles.locationButton}
-        onPress={centerOnUserLocation}
-      >
-        <Ionicons name="locate" size={24} color={COLORS.primary} />
-      </TouchableOpacity>
-
-      {/* Informação da sua localização (opcional, para debug) */}
-      {location && (
-        <View style={styles.locationInfo}>
-          <Text style={styles.locationInfoText}>
-            📍 Lat: {location.latitude.toFixed(4)} | Long: {location.longitude.toFixed(4)}
-          </Text>
+      <View style={styles.legend}>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendDot, { backgroundColor: '#4CAF50' }]} />
+          <Text style={styles.legendText}>Visitados</Text>
         </View>
-      )}
+        <View style={styles.legendItem}>
+          <View style={[styles.legendDot, { backgroundColor: '#FF5722' }]} />
+          <Text style={styles.legendText}>Favoritos</Text>
+        </View>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendDot, { backgroundColor: '#2196F3' }]} />
+          <Text style={styles.legendText}>Recomendados</Text>
+        </View>
+      </View>
     </View>
   );
 }
@@ -164,110 +101,58 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   map: {
-    flex: 1,
+    width: '100%',
+    height: '100%',
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: COLORS.background,
-  },
-  loadingText: {
-    marginTop: 20,
-    fontSize: 16,
-    color: COLORS.darkGray,
-  },
-  errorContainer: {
+  centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.background,
+    backgroundColor: '#fff',
     padding: 20,
   },
-  errorTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: COLORS.black,
-    marginTop: 20,
-    marginBottom: 10,
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#666',
   },
   errorText: {
-    fontSize: 16,
-    color: COLORS.darkGray,
+    fontSize: 18,
+    color: '#FF5722',
     textAlign: 'center',
-    marginBottom: 30,
+    marginBottom: 10,
   },
-  retryButton: {
-    backgroundColor: COLORS.primary,
-    paddingVertical: 15,
-    paddingHorizontal: 30,
-    borderRadius: 10,
+  hintText: {
+    fontSize: 14,
+    color: '#999',
+    textAlign: 'center',
   },
-  retryButtonText: {
-    color: COLORS.white,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  locationButton: {
+  legend: {
     position: 'absolute',
     bottom: 30,
-    right: 20,
-    backgroundColor: COLORS.white,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
+    left: 20,
+    backgroundColor: 'white',
+    padding: 12,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
     elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
   },
-  locationInfo: {
-    position: 'absolute',
-    top: 10,
-    left: 10,
-    right: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    padding: 10,
-    borderRadius: 8,
+  legendItem: {
+    flexDirection: 'row',
     alignItems: 'center',
+    marginVertical: 4,
   },
-  locationInfoText: {
-    fontSize: 12,
-    color: COLORS.darkGray,
-    fontFamily: 'monospace',
+  legendDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 8,
   },
-  markerContainer: {
-    alignItems: 'center',
-  },
-  marker: {
-    backgroundColor: COLORS.primary,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 3,
-    borderColor: COLORS.white,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  markerArrow: {
-    width: 0,
-    height: 0,
-    backgroundColor: 'transparent',
-    borderStyle: 'solid',
-    borderLeftWidth: 6,
-    borderRightWidth: 6,
-    borderTopWidth: 8,
-    borderLeftColor: 'transparent',
-    borderRightColor: 'transparent',
-    borderTopColor: COLORS.primary,
-    marginTop: -1,
+  legendText: {
+    fontSize: 14,
+    color: '#333',
   },
 });
