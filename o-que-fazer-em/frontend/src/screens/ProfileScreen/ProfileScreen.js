@@ -1,255 +1,213 @@
 import React from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  Image, 
+import { useAuth } from '../../context/AuthContext';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
   ScrollView,
-  TouchableOpacity 
+  Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { COLORS } from '../../constants/colors';
 
-export default function ProfileScreen() {
-  // Dados de exemplo (depois virão do backend/context)
-  const userData = {
+export default function ProfileScreen({ navigation }) {
+  // Dados mockados do usuário
+  const { logout } = useAuth();
+  const user = {
     name: 'João Silva',
     email: 'joao@email.com',
-    avatar: 'https://ui-avatars.com/api/?name=Joao+Silva&size=150&background=FF5722&color=fff',
+    photo: 'https://via.placeholder.com/150',
     stats: {
       visited: 24,
       favorites: 12,
-      wantToGo: 8,
-    }
+      friends: 18,
+    },
   };
 
-  const restaurantLists = [
-    { id: '1', name: '❤️ Favoritos', count: 12 },
-    { id: '2', name: '⭐ Quero Ir', count: 8 },
-    { id: '3', name: '☕ Cafés para Estudar', count: 5 },
-    { id: '4', name: '🍣 Comida Asiática', count: 7 },
-  ];
+  const handleLogout = () => {
+  Alert.alert(
+    'Sair',
+    'Tem certeza que deseja sair?',
+    [
+      { text: 'Cancelar', style: 'cancel' },
+      { 
+        text: 'Sair', 
+        style: 'destructive',
+        onPress: () => {
+          logout();
+        }
+      },
+    ]
+  );
+};
+
+  const MenuItem = ({ icon, title, onPress, danger }) => (
+    <TouchableOpacity 
+      style={styles.menuItem}
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
+      <Ionicons 
+        name={icon} 
+        size={24} 
+        color={danger ? COLORS.error : COLORS.darkGray} 
+      />
+      <Text style={[styles.menuText, danger && styles.dangerText]}>
+        {title}
+      </Text>
+      <Ionicons 
+        name="chevron-forward" 
+        size={20} 
+        color={COLORS.gray} 
+      />
+    </TouchableOpacity>
+  );
 
   return (
-    <ScrollView style={styles.container}>
-      {/* Header com avatar e info */}
-      <View style={styles.header}>
-        <Image 
-          source={{ uri: userData.avatar }}
-          style={styles.avatar}
-        />
-        <Text style={styles.name}>{userData.name}</Text>
-        <Text style={styles.email}>{userData.email}</Text>
-      </View>
-
-      {/* Estatísticas */}
-      <View style={styles.statsContainer}>
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{userData.stats.visited}</Text>
-          <Text style={styles.statLabel}>Visitados</Text>
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* Header com foto e nome */}
+        <View style={styles.header}>
+          <Image
+            source={{ uri: user.photo }}
+            style={styles.photo}
+          />
+          <Text style={styles.name}>{user.name}</Text>
+          <Text style={styles.email}>{user.email}</Text>
         </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{userData.stats.favorites}</Text>
-          <Text style={styles.statLabel}>Favoritos</Text>
+
+        {/* Estatísticas */}
+        <View style={styles.statsContainer}>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>{user.stats.visited}</Text>
+            <Text style={styles.statLabel}>Visitados</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>{user.stats.favorites}</Text>
+            <Text style={styles.statLabel}>Favoritos</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>{user.stats.friends}</Text>
+            <Text style={styles.statLabel}>Amigos</Text>
+          </View>
         </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{userData.stats.wantToGo}</Text>
-          <Text style={styles.statLabel}>Quero Ir</Text>
+
+        {/* Menu */}
+        <View style={styles.menu}>
+          <MenuItem
+            icon="person-outline"
+            title="Editar Perfil"
+            onPress={() => Alert.alert('Em breve', 'Funcionalidade em desenvolvimento')}
+          />
+          <MenuItem
+            icon="heart-outline"
+            title="Meus Favoritos"
+            onPress={() => Alert.alert('Em breve', 'Funcionalidade em desenvolvimento')}
+          />
+          <MenuItem
+            icon="people-outline"
+            title="Amigos"
+            onPress={() => Alert.alert('Em breve', 'Funcionalidade em desenvolvimento')}
+          />
+          <MenuItem
+            icon="settings-outline"
+            title="Configurações"
+            onPress={() => Alert.alert('Em breve', 'Funcionalidade em desenvolvimento')}
+          />
+          <MenuItem
+            icon="help-circle-outline"
+            title="Ajuda"
+            onPress={() => Alert.alert('Em breve', 'Funcionalidade em desenvolvimento')}
+          />
+          <MenuItem
+            icon="log-out-outline"
+            title="Sair"
+            onPress={handleLogout}
+            danger
+          />
         </View>
-      </View>
-
-      {/* Listas */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Minhas Listas</Text>
-        
-        {restaurantLists.map((list) => (
-          <TouchableOpacity 
-            key={list.id}
-            style={styles.listItem}
-            onPress={() => console.log('Abrir lista:', list.name)}
-          >
-            <Text style={styles.listName}>{list.name}</Text>
-            <View style={styles.listCount}>
-              <Text style={styles.listCountText}>{list.count}</Text>
-            </View>
-          </TouchableOpacity>
-        ))}
-
-        <TouchableOpacity style={styles.addListButton}>
-          <Text style={styles.addListText}>+ Nova Lista</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Preferências */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Preferências</Text>
-        
-        <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuText}>🍴 Preferências Alimentares</Text>
-          <Text style={styles.menuArrow}>›</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuText}>🔔 Notificações</Text>
-          <Text style={styles.menuArrow}>›</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuText}>🔒 Privacidade</Text>
-          <Text style={styles.menuArrow}>›</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuText}>👥 Gerenciar Amigos</Text>
-          <Text style={styles.menuArrow}>›</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Botão de sair */}
-      <TouchableOpacity style={styles.logoutButton}>
-        <Text style={styles.logoutText}>Sair</Text>
-      </TouchableOpacity>
-
-      <View style={styles.footer} />
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.background,
+  },
+  scrollContent: {
+    paddingBottom: 40,
   },
   header: {
-    backgroundColor: '#fff',
     alignItems: 'center',
-    paddingTop: 60,
-    paddingBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    padding: 20,
+    backgroundColor: COLORS.white,
+    marginBottom: 20,
   },
-  avatar: {
+  photo: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    marginBottom: 12,
+    marginBottom: 15,
+    backgroundColor: COLORS.gray,
   },
   name: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
+    fontWeight: '700',
+    color: COLORS.black,
+    marginBottom: 5,
   },
   email: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 16,
+    color: COLORS.darkGray,
   },
   statsContainer: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
-    paddingVertical: 20,
-    marginTop: 10,
+    backgroundColor: COLORS.white,
+    padding: 20,
+    marginBottom: 20,
     justifyContent: 'space-around',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   statItem: {
     alignItems: 'center',
-    flex: 1,
   },
   statNumber: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#FF5722',
-    marginBottom: 4,
+    fontSize: 24,
+    fontWeight: '700',
+    color: COLORS.primary,
+    marginBottom: 5,
   },
   statLabel: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: 14,
+    color: COLORS.darkGray,
   },
   statDivider: {
     width: 1,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: COLORS.gray,
   },
-  section: {
-    backgroundColor: '#fff',
-    marginTop: 10,
-    paddingVertical: 10,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-  },
-  listItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  listName: {
-    fontSize: 16,
-    color: '#333',
-  },
-  listCount: {
-    backgroundColor: '#FF5722',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  listCountText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  addListButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-  },
-  addListText: {
-    fontSize: 16,
-    color: '#FF5722',
-    fontWeight: '600',
+  menu: {
+    backgroundColor: COLORS.white,
   },
   menuItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: COLORS.background,
   },
   menuText: {
+    flex: 1,
     fontSize: 16,
-    color: '#333',
+    color: COLORS.black,
+    marginLeft: 15,
   },
-  menuArrow: {
-    fontSize: 24,
-    color: '#ccc',
-    fontWeight: '300',
-  },
-  logoutButton: {
-    backgroundColor: '#fff',
-    marginTop: 10,
-    marginHorizontal: 20,
-    paddingVertical: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#FF5722',
-  },
-  logoutText: {
-    color: '#FF5722',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  footer: {
-    height: 40,
+  dangerText: {
+    color: COLORS.error,
   },
 });
